@@ -19,7 +19,8 @@
   import { get, writable, type Writable } from "svelte/store";
   import { onMount, setContext } from "svelte";
   import MatchItem from "$lib/MatchItem.svelte";
-  import { testset, type card } from "$lib/testset";
+  import  type { card, set } from "$lib/testset";
+  import type { LayoutServerData } from "../../$types";
 
   let width: number;
   let height: number;
@@ -27,6 +28,8 @@
   let matches: Writable<MatchItemPair[]> = writable([]);
   let left: Writable<number> = writable();
 
+  export let data: LayoutServerData | set;
+   
   function makeCards(cards: card[]) {
     if (cards.length > 5) {
       return cards.slice(0, 5);
@@ -84,9 +87,9 @@
       return false;
     }
   }
-
+  
   onMount(() => {
-    cards = makeCards(testset.sets[0].cards);
+    cards = makeCards(data!.cards);
     matches.set(makeMatches());
     left.set(cards.length);
   });
@@ -94,10 +97,6 @@
   setContext("matches", matches);
   setContext("aabb", aabb);
   setContext("left", left);
-
-  $: {
-    console.log($left);
-  }
 </script>
 
 <h1>Match</h1>

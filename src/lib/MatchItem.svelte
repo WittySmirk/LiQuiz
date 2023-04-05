@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getContext, onMount } from "svelte";
   import { get, type Writable } from "svelte/store";
-  import type { MatchItemPair } from "../routes/[userid]/[set=integer]/match/+page.svelte";
+  import type { MatchItemPair } from "../routes/[userid]/[set]/match/+page.svelte";
 
   const matches: Writable<MatchItemPair[]> = getContext("matches");
   const aabb: (match: MatchItemPair) => boolean = getContext("aabb");

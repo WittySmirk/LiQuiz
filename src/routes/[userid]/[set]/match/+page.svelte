@@ -20,7 +20,6 @@
   import { onMount, setContext } from "svelte";
   import MatchItem from "$lib/MatchItem.svelte";
   import  type { card, set } from "$lib/testset";
-  import type { LayoutServerData } from "../../$types";
 
   let width: number;
   let height: number;
@@ -28,8 +27,7 @@
   let matches: Writable<MatchItemPair[]> = writable([]);
   let left: Writable<number> = writable();
 
-  export let data: LayoutServerData | set;
-   
+  export let data;
   function makeCards(cards: card[]) {
     if (cards.length > 5) {
       return cards.slice(0, 5);
@@ -101,17 +99,17 @@
 
 <h1>Match</h1>
 
-{#each $matches as match, i}
+{#each $matches as match, index}
   <MatchItem
     text={match.card.term}
-    index={i}
+    {index}
     term={true}
     x={get(match.term.x)}
     y={get(match.term.y)}
   />
   <MatchItem
     text={match.card.definition}
-    index={i}
+    {index}
     term={false}
     x={get(match.definition.x)}
     y={get(match.definition.y)}

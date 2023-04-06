@@ -19,20 +19,22 @@
   import { get, writable, type Writable } from "svelte/store";
   import { onMount, setContext } from "svelte";
   import MatchItem from "$lib/MatchItem.svelte";
-  import  type { card, set } from "$lib/testset";
+  import  type { card } from "$lib/utils/testset.js";
+  import { shuffle } from "$lib/utils/shuffle.js";
 
   let width: number;
   let height: number;
   let cards: card[] = [];
-  let matches: Writable<MatchItemPair[]> = writable([]);
-  let left: Writable<number> = writable();
+  const matches: Writable<MatchItemPair[]> = writable([]);
+  const left: Writable<number> = writable();
 
   export let data;
   function makeCards(cards: card[]) {
-    if (cards.length > 5) {
-      return cards.slice(0, 5);
+    let newCards: card[] = shuffle(cards);
+    if (newCards.length > 5) {
+      return newCards.slice(0, 5);
     } else {
-      return cards;
+      return newCards;
     }
   }
 

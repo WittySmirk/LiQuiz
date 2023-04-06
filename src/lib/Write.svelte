@@ -2,7 +2,7 @@
   import { getContext, onMount, prevent_default } from "svelte/internal";
   import type { Writable } from "svelte/store";
   import Container from "./Container.svelte";
-  import type { card } from "./testset";
+  import type { card } from "./utils/testset";
 
   export let cards: card[];
   export let type: "Page" | "Learn";
@@ -13,26 +13,37 @@
   let current: number = 0;
   let correct: boolean = false;
   let right: number = 0;
-  let index: Writable<number> | undefined = undefined;
-  let learnNext: (() => void) | undefined = undefined;
-  let learnAddCorrect: ((index: number) => void) | undefined = undefined;
-  let learnWrong: ((index: number) => void) | undefined = undefined;
+
+  const index: Writable<number> = getContext("index");
+  const learnNext: (() => void) = getContext("learnNext");
+  const learnAddCorrect: ((index: number) => void) = getContext("learnAddCorrect");
+  const learnWrong: ((index: number) => void) = getContext("learnWrong");
 
   let wrongs: card[] = cards;
 
+  $: {
+    if ($index) {
+      current = $index;
+    }
+  }
+  
   function correctCheck() {
     if (answer.toLowerCase() === cards[current].term.toLowerCase()) {
       if (type === "Learn") {
         if ($index) {
-          learnAddCorrect!($index);
-          learnNext!();
+          learnAddCorrect($index);
+          learnNext();
         }
       }
       correct = true;
       right++;
       wrongs.splice(current, 1);
     } else {
-      
+      if (type === "Learn") {
+        if ($index) {
+          learnWrong($index);
+        }
+      }
       correct = false;
     }
   }
@@ -45,6 +56,10 @@
     }
     answer = "";
     answered = false;
+
+    if (type === "Learn") {
+      learnNext();
+    }
   }
 
   function onkeydown(e: KeyboardEvent) {
@@ -52,21 +67,11 @@
       next();
     }
   }
-
-  onMount(() => {
-    if(type === "Learn") {
-      index = getContext("index");
-      current = $index!;
-      learnNext = getContext("next");
-      learnAddCorrect = getContext("learnAddCorrect");
-      learnWrong = getContext("learnWrong");
-    }
-  });
 </script>
 
 <Container center={false} {onkeydown}>
   {#if !intermission}
-    {#if type === "Learn"}
+    {#if type != "Learn"}
       <div class="pt-5 pb-5">
         <h2 class="text-highlight-color-dark">
           {current + 1} / {cards.length}
@@ -77,7 +82,7 @@
       </div>
     {/if}
 
-    <p class="ml-1 mr-1 text-2xl">
+    <p class="ml-1 mr-1 text-2xl" class:mt-14={type === "Learn"}>
       {cards[current].definition}
     </p>
 
@@ -118,6 +123,7 @@
               id="answer"
               class="rounded ml-1 w-screen text-2xl border-none outline-none bg-bg-color-dark"
               bind:value={answer}
+              autocomplete="new-password"
             />
             <button
               type="submit"

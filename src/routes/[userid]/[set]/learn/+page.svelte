@@ -3,16 +3,17 @@
   import { onMount, setContext } from "svelte";
   import LearnInput from "$lib/LearnInput.svelte";
   import { writable, type Writable } from "svelte/store";
+  import { shuffle } from "$lib/utils/shuffle.js";
 
   export let data;
 
-  let current: Writable<number> = writable(0);
+  const current: Writable<number> = writable(0);
   let type: "Text" | "Mc" | "Flashcard" = randomLearnInputType();
   let currentLevel: number = 0;
   let round: number = 0;
   let finished: boolean = false;
   let levels: {index: number; level: number; correctInARow: number}[] = [];
-  
+  let cards = shuffle(data.cards);
   function randomLearnInputType() {
     const g = Math.floor(Math.random() * 3);
     if (g === 0) {
@@ -79,7 +80,7 @@
 
   setContext("learnAddCorrect", learnAddCorrect);
   setContext("learnWrong", learnWrong);
-  setContext("next", next);
+  setContext("learnNext", next);
   setContext("index", current);
 </script>
 
@@ -88,10 +89,10 @@
 
 {#if !finished}
   <div>{round}</div>
-  <div>{current}</div>
+  <div>{$current}</div>
   <LearnInput
-    {type}
-    cards={data.cards}
+    type="Mc"
+    {cards}
   />
 {:else}
   <h2>Finished</h2>

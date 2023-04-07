@@ -91,7 +91,7 @@
   <div>{round}</div>
   <div>{$current}</div>
   <LearnInput
-    type="Mc"
+    {type}
     {cards}
   />
 {:else}

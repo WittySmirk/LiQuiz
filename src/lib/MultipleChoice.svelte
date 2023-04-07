@@ -3,11 +3,10 @@
   import type { Writable } from "svelte/store";
   import Container from "./Container.svelte";
   import type { card } from "./utils/testset";
-  import { shuffle } from "./utils/shuffle";
 
   export let cards: card[];
 
-  let othersWithAnswer: card[] = [];
+  let randomOthers: number[] = [];
   let indexOfAnswer: number = 0;
   let answered: boolean = false;
   let correct: boolean = false;
@@ -18,29 +17,22 @@
     getContext("learnAddCorrect");
   const learnWrong: (index: number) => void = getContext("learnWrong");
 
-  function makeSureNoRepeats(arr: card[], prev: number[]): number {
-    const a = Math.floor(Math.random() * arr.length);
-    if (prev.length == 0 || !prev.includes(a)) {
-      return a;
-    } else {
-      return makeSureNoRepeats(arr, prev);
-    }
-  }
-
-  function createRandomOthersWithAnswer(cards: card[], index: number): card[] {
-    let o: card[] = [];
-    let p: number[] = [index];
+  function createRandomIndexes(i: number): number[] {
+    let indexes: number[] = [];
     indexOfAnswer = Math.floor(Math.random() * 4);
     for (let i = 0; i < 4; i++) {
-      if (i == indexOfAnswer) {
-        o.push(cards[index]);
-      } else {
-        const indexOfOther = makeSureNoRepeats(cards, p);
-        p.push(indexOfOther);
-        o.push(cards[indexOfOther]);
+      if (i === indexOfAnswer) {
+        indexes.push(i);
+        continue;
       }
+      let r = Math.floor(Math.random() * cards.length);
+      if (indexes.includes(r)) {
+        i--;
+        continue;
+      }
+      indexes.push(r);
     }
-    return o;
+    return indexes;
   }
 
   function chooseAnswer(i: number) {
@@ -57,16 +49,24 @@
   function onkeydown(e: KeyboardEvent) {
     switch (e.key) {
       case "1":
-        chooseAnswer(0);
+        if (!answered) {
+          chooseAnswer(0);
+        }
         break;
       case "2":
-        chooseAnswer(1);
+        if (!answered) {
+          chooseAnswer(1);
+        }
         break;
       case "3":
-        chooseAnswer(2);
+        if (!answered) {
+          chooseAnswer(2);
+        }
         break;
       case "4":
-        chooseAnswer(3);
+        if (!answered) {
+          chooseAnswer(3);
+        }
         break;
       case "Enter":
         if (answered) {
@@ -78,9 +78,9 @@
     }
   }
 
-  onMount(() => {
-    othersWithAnswer = createRandomOthersWithAnswer(shuffle(cards), 0);
-  });
+  $: {
+    randomOthers = createRandomIndexes($index);
+  }
 </script>
 
 <Container center={answered ? true : false} {onkeydown}>
@@ -89,14 +89,14 @@
       {cards[$index].definition}
     </p>
     <div class="mt-10 grid grid-rows-2 grid-cols-2 mr-5 ml-5 mb-5">
-      {#each othersWithAnswer as card, i}
+      {#each randomOthers as card, i}
         <button
           class="text-highlight-color-dark border-none outline outline-1 outline-highlight-color-dark bg-bg-color-dark text-xl pl-16 pr-16 pt-1 pb-1 rounded-md m-1"
           id="answerButton"
           on:click={() => chooseAnswer(i)}
         >
           <p class="relative text-text-color-dark text-sm">{i + 1}</p>
-          {card.term}
+          {cards[card].term}
         </button>
       {/each}
     </div>

@@ -15,9 +15,10 @@
   let right: number = 0;
 
   const index: Writable<number> = getContext("index");
-  const learnNext: (() => void) = getContext("learnNext");
-  const learnAddCorrect: ((index: number) => void) = getContext("learnAddCorrect");
-  const learnWrong: ((index: number) => void) = getContext("learnWrong");
+  const learnNext: () => void = getContext("learnNext");
+  const learnAddCorrect: (index: number) => void =
+    getContext("learnAddCorrect");
+  const learnWrong: (index: number) => void = getContext("learnWrong");
 
   let wrongs: card[] = cards;
 
@@ -26,13 +27,12 @@
       current = $index;
     }
   }
-  
+
   function correctCheck() {
     if (answer.toLowerCase() === cards[current].term.toLowerCase()) {
       if (type === "Learn") {
         if ($index) {
           learnAddCorrect($index);
-          learnNext();
         }
       }
       correct = true;
@@ -93,14 +93,16 @@
           answered = true;
           correctCheck();
         }}
-        class="flex flex-col outline outline-1 outline-undertone-color-dark rounded-2xl "
+        class="flex flex-col outline outline-1 outline-undertone-color-dark rounded-2xl"
       >
         {#if answered}
           <div class="ml-1 mb-1">
-            <h4 class="text-highlight-color-dark">
-              {correct ? "Correct!" : "Incorrect!"}
-            </h4>
-            <p>{cards[current].term}</p>
+            {#if correct}
+              <h4 class="text-highlight-color-dark">Correct</h4>
+            {:else}
+              <h4 class="text-highlight-color-dark">Incorrect</h4>
+              <p>{cards[current].term}</p>
+            {/if}
             <button
               on:click={next}
               class="rounded text-highlight-color-dark border-none outline outline-1 outline-highlight-color-dark bg-bg-color-dark"
